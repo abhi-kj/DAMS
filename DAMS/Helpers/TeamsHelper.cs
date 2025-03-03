@@ -1,6 +1,6 @@
 ﻿
 namespace DAMS.Helpers
-{ 
+{
     public class TeamsHelper
     {
         private readonly HttpClient _httpClient;
@@ -55,6 +55,34 @@ namespace DAMS.Helpers
 
             await _httpClient.PostAsJsonAsync(_webhookUrl, messageCard);
         }
-    }
 
+
+        public async Task SendDailyReportAsync(int successCount, int failCount)
+        {
+            var currentDate = DateTime.UtcNow.AddHours(5.5).ToString("yyyy-MM-dd HH:mm:ss"); // IST time
+            var messageCard = new
+            {
+                @type = "MessageCard",
+                @context = "https://schema.org/extensions",
+                summary = "Daily Mail Report",
+                themeColor = "0078D7",
+                title = $"Update on {currentDate}",
+                sections = new[]
+                {
+                    new
+                    {
+                        activityTitle = "Daily Mail Report of ETMP Production",
+                        facts = new[]
+                        {
+                            new { name = "Successful Messages:", value = $"{successCount} messages were sent successfully." },
+                            new { name = "Failed Messages:", value = $"{failCount} messages failed to send." }
+                        }
+                    }
+                }
+            };
+
+            await _httpClient.PostAsJsonAsync(_webhookUrl, messageCard);
+        }
+
+    }
 }

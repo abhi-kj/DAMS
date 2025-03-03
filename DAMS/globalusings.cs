@@ -1,19 +1,12 @@
-﻿global using Microsoft.EntityFrameworkCore;
+﻿global using DAMS.DatabaseModel.ETMP.INT.DB.DBContext;
 global using DAMS.DatabaseModel.ETMP.INT.DB.Models;
 global using DAMS.DatabaseModel.ETMP.SPS.DB.Models;
-global using DAMS.DatabaseModel.ETMP.INT.DB.DBContext;
-global using DAMS.DatabaseModel.ETMP.SPS.DB.DBContext;
-global using System.Net.Http;
-global using System.Net.Http.Json;
-global using System.Threading.Tasks;
-
 global using DAMS.Helpers;
 global using DAMS.Repository;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
-global using System;
-global using System.IO;
-global using System.Net.Http;
-global using System.Threading.Tasks;
+global using Microsoft.Extensions.Logging;
+global using Serilog;
+global using System.Net.Http.Json;

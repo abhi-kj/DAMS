@@ -1,43 +1,75 @@
-﻿
-
-class Program
+﻿class Program
 {
     static async Task Main(string[] args)
     {
-        var builder = new HostBuilder()
-            .ConfigureAppConfiguration((context, config) =>
-            {
-                config.SetBasePath(Directory.GetCurrentDirectory());
-                config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-            })
-            .ConfigureServices((context, services) =>
-            {
-                var connectionString = context.Configuration.GetConnectionString("DefaultConnection");
-                var webhookUrl = context.Configuration["TeamsWebhookUrl"];
+        // Configure Serilog
+        Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddUserSecrets<Program>()
+                .Build())
+            .WriteTo.File("Logs/app-.log", rollingInterval: RollingInterval.Day)
+            .CreateLogger();
 
-                services.AddDbContext<INTDbContext>(options =>
-                    options.UseSqlServer(connectionString));
-
-                services.AddScoped<NotificationRepository>();
-               
-                services.AddHttpClient<TeamsHelper>(client =>
-                {
-                    client.BaseAddress = new Uri(webhookUrl);
-                });
-            });
-
-        var host = builder.Build();
-
-        using (var scope = host.Services.CreateScope())
+        try
         {
-            var services = scope.ServiceProvider;
-            var notificationRepository = services.GetRequiredService<NotificationRepository>();
-            var teamsHelper = services.GetRequiredService<TeamsHelper>();
+            var builder = new HostBuilder()
+                .ConfigureAppConfiguration((context, config) =>
+                {
+                    config.SetBasePath(Directory.GetCurrentDirectory());
+                    config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+                    config.AddUserSecrets<Program>();
+                })
+                .ConfigureServices((context, services) =>
+                {
+                    var connectionString = context.Configuration.GetConnectionString("DefaultConnection");
+                    var webhookUrl = context.Configuration["TeamsWebhookUrl"];
 
-            var (successCount, failCount) = await notificationRepository.GetNotificationCountsAsync();
-            var message = $"In the last 24 hours, there were {successCount} successful notifications and {failCount} failed notifications.";
+                    services.AddDbContext<INTDbContext>(options =>
+                        options.UseSqlServer(connectionString));
 
-            await teamsHelper.SendMessageAsync(message);
+                    services.AddScoped<NotificationRepository>();
+
+                    services.AddHttpClient<TeamsHelper>(client =>
+                    {
+                        client.BaseAddress = new Uri(webhookUrl);
+                    });
+
+                    services.AddLogging(loggingBuilder =>
+                    {
+                        loggingBuilder.ClearProviders();
+                        loggingBuilder.AddSerilog();
+                    });
+                });
+
+            var host = builder.Build();
+
+            using (var scope = host.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var notificationRepository = services.GetRequiredService<NotificationRepository>();
+                var teamsHelper = services.GetRequiredService<TeamsHelper>();
+
+                try
+                {
+                    var (successCount, failCount) = await notificationRepository.GetNotificationCountsAsync();
+                    await teamsHelper.SendDailyReportAsync(successCount, failCount);
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while processing notifications.");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "Host terminated unexpectedly");
+        }
+        finally
+        {
+            Log.CloseAndFlush();
         }
     }
 }
