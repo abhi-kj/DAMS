@@ -8,7 +8,7 @@ namespace DAMS.DatabaseModel.ETMP.INT.DB.DBContext
     {
         public INTDbContext(DbContextOptions<INTDbContext> options) : base(options) { }
 
-        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Notification> Notification { get; set; }
     }
 
   

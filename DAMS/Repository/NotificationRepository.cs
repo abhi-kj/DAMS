@@ -29,7 +29,7 @@ namespace DAMS.Repository
             {
                 int daysToCheck = _configuration.GetValue<int>("NotificationSettings:DaysToCheck");
                 var dateThreshold = DateTime.UtcNow.AddDays(-daysToCheck);
-                var notifications = await _context.Notifications
+                var notifications = await _context.Notification
                     .Where(n => n.CreatedDate >= dateThreshold)
                     .ToListAsync();
 

@@ -11,15 +11,25 @@ namespace DAMS.Helpers
             _httpClient = httpClient;
             _webhookUrl = webhookUrl;
         }
+        
+        public TeamsHelper( string webhookUrl)
+        {
+            
+            _webhookUrl = webhookUrl;
+        }
+
+      
 
         public async Task SendMessageAsync(string message)
         {
+            using var _httpClient = new HttpClient();
             var payload = new { text = message };
             await _httpClient.PostAsJsonAsync(_webhookUrl, payload);
         }
 
         public async Task SendMessageSuccessAsync(string repository, string branch, string commit, string runId, string serverUrl)
         {
+            using var _httpClient = new HttpClient();
             var messageCard = new
             {
                 @type = "MessageCard",
@@ -59,6 +69,7 @@ namespace DAMS.Helpers
 
         public async Task SendDailyReportAsync(int successCount, int failCount)
         {
+            using var _httpClient = new HttpClient();
             var currentDate = DateTime.UtcNow.AddHours(5.5).ToString("yyyy-MM-dd HH:mm:ss"); // IST time
             var messageCard = new
             {

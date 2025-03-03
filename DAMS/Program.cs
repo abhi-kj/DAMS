@@ -23,7 +23,7 @@
                 })
                 .ConfigureServices((context, services) =>
                 {
-                    var connectionString = context.Configuration.GetConnectionString("DefaultConnection");
+                    var connectionString = context.Configuration.GetConnectionString("ETMPINTDBConnection");
                     var webhookUrl = context.Configuration["TeamsWebhookUrl"];
 
                     services.AddDbContext<INTDbContext>(options =>
@@ -31,10 +31,7 @@
 
                     services.AddScoped<NotificationRepository>();
 
-                    services.AddHttpClient<TeamsHelper>(client =>
-                    {
-                        client.BaseAddress = new Uri(webhookUrl);
-                    });
+                    services.AddScoped<TeamsHelper>();
 
                     services.AddLogging(loggingBuilder =>
                     {
@@ -48,8 +45,10 @@
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
+                var context = services.GetRequiredService<IConfiguration>();
+                var webhookUrl = context["TeamsWebhookUrl"];
                 var notificationRepository = services.GetRequiredService<NotificationRepository>();
-                var teamsHelper = services.GetRequiredService<TeamsHelper>();
+                var teamsHelper = new TeamsHelper(webhookUrl);
 
                 try
                 {
@@ -65,7 +64,7 @@
         }
         catch (Exception ex)
         {
-            Log.Fatal(ex, "Host terminated unexpectedly");
+            Log.Fatal(ex, "Host terminated unexpectedly" + Environment.NewLine + ex.Message);
         }
         finally
         {
