@@ -31,7 +31,7 @@ namespace DAMS.Repository
                 int daysToCheck = _configuration.GetValue<int>("NotificationSettings:DaysToCheck");
                 var dateThreshold = DateTime.UtcNow.AddDays(-daysToCheck);
                 var notifications = await _context.Notification
-                    .Where(n => n.CreatedDate >= dateThreshold)
+                    .Where(n => n.CreatedDate >= dateThreshold).AsNoTracking()
                     .ToListAsync();
 
                 var successCount = notifications.Count(n => n.IsSent);
@@ -54,7 +54,7 @@ namespace DAMS.Repository
             var notificationTemplateIds = failedMails.Select(n => n.NotificationTemplateId).ToList();
 
             var skipCount = _context.UserNotificationExclusion
-                .Where(une => une.IsActive == true && notificationTemplateIds.Contains(une.NotificationTemplateId))
+                .Where(une => une.IsActive == true && notificationTemplateIds.Contains(une.NotificationTemplateId)).AsNoTracking()
                 .Select(une => une.UserWwid)
                 .Distinct()
                 .Count();

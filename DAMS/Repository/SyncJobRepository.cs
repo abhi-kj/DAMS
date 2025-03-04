@@ -49,31 +49,18 @@ namespace DAMS.Repository
         {
             try
             {
-                var dt = _context.JobHistories.Where(w => w.CreatedDate >= startDate && w.CreatedDate < endDate)
-                          .Join(_context.Jobs,
-                              his => his.JobId,
-                              job => job.JobId,
-                              (his, job) => new
-                              {
-                                  history = his,
-                                  job = job
-                              })
-                          .Join(_context.JobHistoryLogs,
-                              h => h.history.JobHistoryId,
-                              log => log.JobHistoryId,
-                              (h, log) =>
-                              new ETMPJobHistory
-                              {
-                                  JobTitle = h.job.JobName,
-                                  JobID = h.history.JobId,
-                                  StatusId = h.history.StatusId,
-                                  JobHistoryID = h.history.JobHistoryId,
-                                  HangfireJobID = h.history.HangfireJobId,
-                                  JobStartDate = h.history.JobStartDate,
-                                  Message = h.history.Message ?? log.LogDesc,
-                                  CreatedBy = h.history.CreatedBy,
-                                  CreatedDate = h.history.CreatedDate
-                              }).ToList();
+                var dt = (from history in _context.JobHistories
+                          where history.CreatedDate >= startDate && history.CreatedDate < endDate
+                          join job in _context.Jobs on history.JobId equals job.JobId
+                          join log in _context.JobHistoryLogs on history.JobHistoryId equals log.JobHistoryId
+                          select new ETMPJobHistory
+                          {
+                            
+                              JobID = history.JobId,
+                              StatusId = history.StatusId,
+                              JobHistoryID = history.JobHistoryId,
+                           
+                          }).AsNoTracking().ToList();
 
                 return dt;
             }

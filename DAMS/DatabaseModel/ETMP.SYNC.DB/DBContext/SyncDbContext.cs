@@ -54,7 +54,12 @@ namespace DAMS.DatabaseModel.ETMP.SYNC.DB.DBContext
 
                 entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
 
-             
+                entity.HasOne(d => d.Job)
+                    .WithMany(p => p.JobHistories)
+                    .HasForeignKey(d => d.JobId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Job_JobHistory_JobID");
+ 
             });
 
             modelBuilder.Entity<JobHistoryLog>(entity =>
@@ -83,6 +88,15 @@ namespace DAMS.DatabaseModel.ETMP.SYNC.DB.DBContext
 
                 entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
 
+           
+
+                entity.HasOne(d => d.JobHistory)
+                    .WithMany(p => p.JobHistoryLogs)
+                    .HasForeignKey(d => d.JobHistoryId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_JobHistory_JobHistoryLog_JobHistoryID");
+
+             
             });
         }
     }

@@ -1,9 +1,12 @@
 ﻿
 namespace DAMS.DatabaseModel.ETMP.SYNC.DB.Models
 {
-    public  class JobHistory
+    public partial class JobHistory
     {
-      
+        public JobHistory()
+        {
+            JobHistoryLogs = new HashSet<JobHistoryLog>();
+        }
 
         public Guid JobHistoryId { get; set; }
         public int JobId { get; set; }
@@ -16,6 +19,10 @@ namespace DAMS.DatabaseModel.ETMP.SYNC.DB.Models
         public DateTime CreatedDate { get; set; }
         public int? UpdatedBy { get; set; }
         public DateTime? UpdatedDate { get; set; }
-   
+
+        public virtual Job Job { get; set; } = null!;
+        public virtual ICollection<JobHistoryLog> JobHistoryLogs { get; set; }
+
+
     }
 }

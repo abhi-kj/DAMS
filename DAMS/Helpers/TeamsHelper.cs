@@ -88,13 +88,13 @@ namespace DAMS.Helpers
                         facts = new[]
                         {
                             new { name = "Successful Mails:", value = $"<span style='color:green'><b>{reportData.MailReportData.MailSuccessCount}</b></span> messages were sent successfully." },
-                            new { name = "Failed Mails:", value = $"<span style='color:red'><b>{reportData.MailReportData.MailFailCount}</b></span> messages failed to send." },
+                            new { name = "Failed Mails:", value = reportData.MailReportData.MailFailCount > 0 ? $"<span style='color:red'><b>{reportData.MailReportData.MailFailCount}</b></span> messages failed to send." : $"{reportData.MailReportData.MailFailCount} messages failed to send." },
                             new { name = "Skipped Mails:", value = $"<b>{reportData.MailReportData.SkipCount}</b> messages were skipped." }
                         }
                     },
                     new
                     {
-                        activityTitle = "<hr style='border:2px solid blue' />",
+                        activityTitle = "<hr style='border:2px solid blue; width:100%' />",
                         facts = new[]
                         {
                             new { name = "", value = "" }
@@ -106,7 +106,7 @@ namespace DAMS.Helpers
                         facts = new[]
                         {
                             new { name = "Successful Job Syncs:", value = $"<span style='color:green'><b>{reportData.SyncReportData.SyncSuccessCount}</b></span> syncs were successful." },
-                            new { name = "Failed Job Syncs:", value = $"<span style='color:red'><b>{reportData.SyncReportData.SyncFailCount}</b></span> syncs failed." }
+                            new { name = "Failed Job Syncs:", value = reportData.SyncReportData.SyncFailCount > 0 ? $"<span style='color:red'><b>{reportData.SyncReportData.SyncFailCount}</b></span> syncs failed." : $"{reportData.SyncReportData.SyncFailCount} syncs failed." }
                         }
                     }
                 }

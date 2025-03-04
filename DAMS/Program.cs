@@ -63,8 +63,8 @@ class Program
 
                 try
                 {
-                    var emailReportData = await notificationRepository.GetNotificationCountsAsync();
                     var sycReportData = syncJobRepository.GetJobReportData();
+                    var emailReportData = await notificationRepository.GetNotificationCountsAsync();
                     await teamsHelper.SendDailyReportAsync(new ReportData()
                     {
                         MailReportData = emailReportData,
