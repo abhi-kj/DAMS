@@ -1,4 +1,7 @@
-﻿class Program
+﻿using DAMS.DatabaseModel.ETMP.SYNC.DB.DBContext;
+using DAMS.DTO;
+
+class Program
 {
     static async Task Main(string[] args)
     {
@@ -23,13 +26,20 @@
                 })
                 .ConfigureServices((context, services) =>
                 {
-                    var connectionString = context.Configuration.GetConnectionString("ETMPINTDBConnection");
                     var webhookUrl = context.Configuration["TeamsWebhookUrl"];
+                    var ETMPINTDBConnection = context.Configuration.GetConnectionString("ETMPINTDBConnection");
 
                     services.AddDbContext<INTDbContext>(options =>
-                        options.UseSqlServer(connectionString));
+                        options.UseSqlServer(ETMPINTDBConnection));
+
+
+                    var ETMPSyncDBConnection = context.Configuration.GetConnectionString("ETMPSyncDBConnection");
+
+                    services.AddDbContext<SyncDbContext>(options =>
+                        options.UseSqlServer(ETMPSyncDBConnection));
 
                     services.AddScoped<NotificationRepository>();
+                    services.AddScoped<SyncJobRepository>();
 
                     services.AddScoped<TeamsHelper>();
 
@@ -48,12 +58,18 @@
                 var context = services.GetRequiredService<IConfiguration>();
                 var webhookUrl = context["TeamsWebhookUrl"];
                 var notificationRepository = services.GetRequiredService<NotificationRepository>();
+                var syncJobRepository = services.GetRequiredService<SyncJobRepository>();
                 var teamsHelper = new TeamsHelper(webhookUrl);
 
                 try
                 {
-                    var (successCount, failCount) = await notificationRepository.GetNotificationCountsAsync();
-                    await teamsHelper.SendDailyReportAsync(successCount, failCount);
+                    var emailReportData = await notificationRepository.GetNotificationCountsAsync();
+                    var sycReportData = syncJobRepository.GetJobReportData();
+                    await teamsHelper.SendDailyReportAsync(new ReportData()
+                    {
+                        MailReportData = emailReportData,
+                        SyncReportData = sycReportData
+                    });
                 }
                 catch (Exception ex)
                 {

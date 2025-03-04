@@ -1,4 +1,5 @@
 ﻿
+using DAMS.DTO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
@@ -23,7 +24,7 @@ namespace DAMS.Repository
             _logger = logger;
         }
 
-        public async Task<(int SuccessCount, int FailCount)> GetNotificationCountsAsync()
+        public async Task<MailReportData> GetNotificationCountsAsync()
         {
             try
             {
@@ -34,9 +35,12 @@ namespace DAMS.Repository
                     .ToListAsync();
 
                 var successCount = notifications.Count(n => n.IsSent);
-                var failCount = notifications.Count(n => !n.IsSent);
+                var failedMails = notifications.Where(n => !n.IsSent).ToList();
+                var failCount = failedMails.Count();
+                var skipCount = GetSkipMailCount(failedMails);
+                failCount = failCount - skipCount;
 
-                return (successCount, failCount);
+                return new MailReportData() { MailSuccessCount = successCount, MailFailCount = failCount, SkipCount = skipCount };
             }
             catch (Exception ex)
             {
@@ -44,5 +48,19 @@ namespace DAMS.Repository
                 throw;
             }
         }
+
+        private int GetSkipMailCount(List<Notification> failedMails)
+        {
+            var notificationTemplateIds = failedMails.Select(n => n.NotificationTemplateId).ToList();
+
+            var skipCount = _context.UserNotificationExclusion
+                .Where(une => une.IsActive == true && notificationTemplateIds.Contains(une.NotificationTemplateId))
+                .Select(une => une.UserWwid)
+                .Distinct()
+                .Count();
+
+            return skipCount;
+        }
+
     }
 }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DAMS.DTO;
+using DAMS.Repository;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,13 +12,15 @@ namespace DAMS.Actions
     {
         private readonly IConfiguration _configuration;
         private readonly NotificationRepository _notificationRepository;
+        private readonly SyncJobRepository _syncJobRepository;
         private readonly TeamsHelper _teamsHelper;
         private readonly ILogger<ProcessNotificationsAction> _logger;
 
-        public ProcessNotificationsAction(IConfiguration configuration, NotificationRepository notificationRepository, TeamsHelper teamsHelper, ILogger<ProcessNotificationsAction> logger)
+        public ProcessNotificationsAction(IConfiguration configuration, NotificationRepository notificationRepository, SyncJobRepository syncJobRepository, TeamsHelper teamsHelper, ILogger<ProcessNotificationsAction> logger)
         {
             _configuration = configuration;
             _notificationRepository = notificationRepository;
+            _syncJobRepository = syncJobRepository;
             _teamsHelper = teamsHelper;
             _logger = logger;
         }
@@ -28,8 +32,13 @@ namespace DAMS.Actions
 
             try
             {
-                var (successCount, failCount) = await _notificationRepository.GetNotificationCountsAsync();
-                await _teamsHelper.SendDailyReportAsync(successCount, failCount);
+                var emailReportData = await _notificationRepository.GetNotificationCountsAsync();
+                var sycReportData = _syncJobRepository.GetJobReportData();
+                await teamsHelper.SendDailyReportAsync(new ReportData()
+                {
+                    MailReportData = emailReportData,
+                    SyncReportData = sycReportData
+                });
             }
             catch (Exception ex)
             {
