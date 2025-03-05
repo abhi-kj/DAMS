@@ -1,5 +1,6 @@
 ﻿
 using DAMS.DTO;
+using Newtonsoft.Json;
 using System.Text;
 
 namespace DAMS.Helpers
@@ -153,19 +154,19 @@ namespace DAMS.Helpers
                                 new
                                 {
                                     type = "TextBlock",
-                                    text = $"Successful Mails: <span style='color:green'><b>{reportData.MailReportData.MailSuccessCount}</b></span> messages were sent successfully.",
+                                    text = $"Successful Mails: {reportData.MailReportData.MailSuccessCount} messages were sent successfully.",
                                     wrap = true
                                 },
                                 new
                                 {
                                     type = "TextBlock",
-                                    text = reportData.MailReportData.MailFailCount > 0 ? $"Failed Mails: <span style='color:red'><b>{reportData.MailReportData.MailFailCount}</b></span> messages failed to send." : $"Failed Mails: {reportData.MailReportData.MailFailCount} messages failed to send.",
+                                    text = reportData.MailReportData.MailFailCount > 0 ? $"Failed Mails: {reportData.MailReportData.MailFailCount} messages failed to send." : $"Failed Mails: {reportData.MailReportData.MailFailCount} messages failed to send.",
                                     wrap = true
                                 },
                                 new
                                 {
                                     type = "TextBlock",
-                                    text = $"Skipped Mails: <b>{reportData.MailReportData.SkipCount}</b> messages were skipped.",
+                                    text = $"Skipped Mails: {reportData.MailReportData.SkipCount} messages were skipped.",
                                     wrap = true
                                 },
                                 new
@@ -183,13 +184,13 @@ namespace DAMS.Helpers
                                 new
                                 {
                                     type = "TextBlock",
-                                    text = $"Successful Job Syncs: <span style='color:green'><b>{reportData.SyncReportData.SyncSuccessCount}</b></span> syncs were successful.",
+                                    text = $"Successful Job Syncs: {reportData.SyncReportData.SyncSuccessCount} syncs were successful.",
                                     wrap = true
                                 },
                                 new
                                 {
                                     type = "TextBlock",
-                                    text = reportData.SyncReportData.SyncFailCount > 0 ? $"Failed Job Syncs: <span style='color:red'><b>{reportData.SyncReportData.SyncFailCount}</b></span> syncs failed." : $"Failed Job Syncs: {reportData.SyncReportData.SyncFailCount} syncs failed.",
+                                    text = reportData.SyncReportData.SyncFailCount > 0 ? $"Failed Job Syncs: {reportData.SyncReportData.SyncFailCount} syncs failed." : $"Failed Job Syncs: {reportData.SyncReportData.SyncFailCount} syncs failed.",
                                     wrap = true
                                 }
                             }
